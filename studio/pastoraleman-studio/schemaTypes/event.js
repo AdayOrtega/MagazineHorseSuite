@@ -1,0 +1,50 @@
+export default {
+  name: "event",
+  title: "Evento",
+  type: "document",
+  fields: [
+    { name: "title", title: "Título", type: "string", validation: (Rule) => Rule.required() },
+    {
+      name: "slug",
+      title: "Slug",
+      type: "slug",
+      options: { source: "title", maxLength: 96 },
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: "type",
+      title: "Tipo",
+      type: "string",
+      options: { list: ["Exposición", "IPO/IGP", "Seminario", "Valoración", "Otro"] },
+      validation: (Rule) => Rule.required(),
+    },
+    { name: "country", title: "País", type: "string", validation: (Rule) => Rule.required() },
+    { name: "location", title: "Ciudad / Lugar", type: "string", validation: (Rule) => Rule.required() },
+    {
+      name: "date",
+      title: "Fecha",
+      type: "date",
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: "description",
+      title: "Descripción corta",
+      type: "text",
+      rows: 3,
+      validation: (Rule) => Rule.required().max(220),
+    },
+    {
+      name: "body",
+      title: "Contenido (opcional)",
+      type: "array",
+      of: [{ type: "block" }, { type: "image", options: { hotspot: true } }],
+    },
+    {
+      name: "coverImage",
+      title: "Imagen (opcional)",
+      type: "image",
+      options: { hotspot: true },
+      fields: [{ name: "alt", title: "Alt text", type: "string" }],
+    },
+  ],
+};

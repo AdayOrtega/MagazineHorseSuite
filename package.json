@@ -9,9 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@portabletext/react": "^6.0.2",
+    "@sanity/asset-utils": "^2.3.0",
+    "@sanity/image-url": "^2.0.3",
+    "lucide-react": "^0.575.0",
     "next": "16.1.6",
+    "next-sanity": "^12.1.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
