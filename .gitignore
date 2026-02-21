@@ -1,10 +1,33 @@
+# OS
 .DS_Store
+Thumbs.db
+
+# Node / JS
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env (no subir secretos)
 .env
 .env.*
+!.env.example
+
+# Build outputs
 .next/
 out/
 dist/
 build/
 coverage/
+
+# Logs
+logs/
 *.log
+
+# IDE
+.vscode/
+.idea/
+
+# Sanity
+.sanity/
