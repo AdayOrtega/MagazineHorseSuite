@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import { articles, categories } from "@/data/mockData";
 
@@ -41,14 +42,19 @@ export default function HomePage() {
         <h3 className="font-display text-2xl font-bold">Explora Nuestras Secciones</h3>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {categories.map((cat) => (
-            <div key={cat.slug} className="rounded-2xl border bg-card p-5 shadow-sm">
+            <Link
+              key={cat.slug}
+              href={`/categoria/${cat.slug}`}
+              className="block rounded-2xl border bg-card p-5 shadow-sm hover:shadow-md transition focus:outline-none focus:ring-2 focus:ring-black/20"
+              aria-label={`Ir a la sección ${cat.name}`}
+            >
               <div className="text-sm font-body uppercase tracking-wide text-muted-foreground">
                 {cat.name}
               </div>
               <p className="mt-2 text-sm text-muted-foreground font-body leading-relaxed">
                 {cat.description}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
