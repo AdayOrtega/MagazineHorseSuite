@@ -4,17 +4,17 @@ import React, { useEffect, useMemo, useState } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 
-function getSiteUrl() {
-  const env = process.env.NEXT_PUBLIC_SITE_URL;
-  if (env) return env.replace(/\/$/, "");
-  if (typeof window !== "undefined") return window.location.origin;
-  return "";
-}
+function getCleanShareUrl() {
+  if (typeof window === "undefined") return "";
 
-function buildShareUrl(siteUrl, pathname) {
-  if (!siteUrl) return "";
-  if (!pathname) return siteUrl;
-  return `${siteUrl}${pathname}`; // pathname ya empieza por /
+  // Usamos la URL REAL del navegador (incluye el dominio correcto en prod)
+  const u = new URL(window.location.href);
+
+  // Limpieza: fuera query y hash (evita ?fbclid=... y #:~:text=...)
+  u.search = "";
+  u.hash = "";
+
+  return u.toString();
 }
 
 function encode(u) {
@@ -22,46 +22,44 @@ function encode(u) {
 }
 
 export default function ShareButtons({ title = "", className = "" }) {
-  const pathname = usePathname();
+  const pathname = usePathname(); // solo para re-render al navegar
   const [copied, setCopied] = useState(false);
 
-  const siteUrl = useMemo(() => getSiteUrl(), []);
-  const shareUrl = useMemo(() => buildShareUrl(siteUrl, pathname), [siteUrl, pathname]);
-
-  // IMPORTANTÍSIMO:
-  // Facebook/Twitter/etc deben recibir una URL limpia SIN fragmentos (#...)
-  // porque Chrome a veces añade #:~:text=... y rompe el preview/caché.
-  const cleanShareUrl = useMemo(() => (shareUrl ? shareUrl.split("#")[0] : ""), [shareUrl]);
+  const shareUrl = useMemo(() => getCleanShareUrl(), []);
 
   // Re-renderiza widgets oficiales cuando cambia la URL (navegación client-side)
   useEffect(() => {
+    if (!shareUrl) return;
+
     // X (Twitter)
     if (typeof window !== "undefined" && window.twttr?.widgets?.load) {
       window.twttr.widgets.load();
     }
+
     // Facebook
     if (typeof window !== "undefined" && window.FB?.XFBML?.parse) {
       window.FB.XFBML.parse();
     }
-  }, [cleanShareUrl]);
+  }, [shareUrl]);
 
-  const xText = title ? `${title}` : "Mira esto";
+  const text = title ? `${title}` : "Mira esto";
 
-  // Links de share (URL limpia)
-  const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${encode(cleanShareUrl)}`;
-  const xShareHref = `https://twitter.com/intent/tweet?url=${encode(cleanShareUrl)}&text=${encode(xText)}`;
-  const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encode(cleanShareUrl)}`;
-  const whatsappHref = `https://api.whatsapp.com/send?text=${encode(`${xText} ${cleanShareUrl}`)}`;
-  const telegramHref = `https://t.me/share/url?url=${encode(cleanShareUrl)}&text=${encode(xText)}`;
+  // X widget oficial (intent + widgets.js)
+  const xShareHref = `https://twitter.com/intent/tweet?url=${encode(shareUrl)}&text=${encode(text)}`;
+
+  // LinkedIn (share URL)
+  const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encode(shareUrl)}`;
+  const whatsappHref = `https://api.whatsapp.com/send?text=${encode(`${text} ${shareUrl}`)}`;
+  const telegramHref = `https://t.me/share/url?url=${encode(shareUrl)}&text=${encode(text)}`;
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(cleanShareUrl);
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
     } catch {
       const el = document.createElement("textarea");
-      el.value = cleanShareUrl;
+      el.value = shareUrl;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
@@ -71,19 +69,28 @@ export default function ShareButtons({ title = "", className = "" }) {
     }
   }
 
-  if (!cleanShareUrl) return null;
+  if (!shareUrl) return null;
+
+  const btnStyle = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "6px 10px",
+    borderRadius: 8,
+    border: "1px solid rgba(0,0,0,0.15)",
+    fontSize: 13,
+    textDecoration: "none",
+    background: "white",
+    cursor: "pointer",
+    lineHeight: 1,
+  };
 
   return (
     <div
       className={className}
-      style={{
-        display: "flex",
-        gap: 12,
-        flexWrap: "wrap",
-        alignItems: "center",
-      }}
+      style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginTop: 24 }}
     >
-      {/* Facebook SDK (widget oficial) */}
+      {/* --- Facebook SDK (botón “oficial”) --- */}
       <div id="fb-root" />
       <Script
         id="facebook-jssdk"
@@ -91,118 +98,43 @@ export default function ShareButtons({ title = "", className = "" }) {
         src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"
       />
 
-      {/* Opción 1: Botón oficial FB (a veces “caprichoso” según navegador) */}
-      <div className="fb-share-button" data-href={cleanShareUrl} data-layout="button_count" data-size="small" />
+      {/* IMPORTANTE: Solo este Facebook. (Nada de otro botón “Facebook” extra) */}
+      <div
+        className="fb-share-button"
+        data-href={shareUrl}
+        data-layout="button_count"
+        data-size="small"
+      />
 
-      {/* Opción 2 (recomendada): enlace directo al share dialog (fiable) */}
-      <a
-        href={facebookHref}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "6px 10px",
-          borderRadius: 6,
-          border: "1px solid rgba(0,0,0,0.15)",
-          fontSize: 13,
-          textDecoration: "none",
-        }}
-        aria-label="Compartir en Facebook"
-        title="Compartir en Facebook"
-      >
-        Facebook
-      </a>
-
-      {/* X (Twitter) widget oficial */}
+      {/* --- X (Twitter) widget oficial --- */}
       <Script id="twitter-widgets" strategy="afterInteractive" src="https://platform.twitter.com/widgets.js" />
       <a
         className="twitter-share-button"
         href={xShareHref}
         data-size="small"
-        data-text={xText}
-        data-url={cleanShareUrl}
+        data-text={text}
+        data-url={shareUrl}
       >
-        Tweet
+        Post
       </a>
 
-      {/* LinkedIn (share URL) */}
-      <a
-        href={linkedinHref}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "6px 10px",
-          borderRadius: 6,
-          border: "1px solid rgba(0,0,0,0.15)",
-          fontSize: 13,
-          textDecoration: "none",
-        }}
-        aria-label="Compartir en LinkedIn"
-        title="Compartir en LinkedIn"
-      >
+      {/* --- LinkedIn --- */}
+      <a href={linkedinHref} target="_blank" rel="noreferrer" style={btnStyle} aria-label="Compartir en LinkedIn">
         LinkedIn
       </a>
 
-      {/* WhatsApp */}
-      <a
-        href={whatsappHref}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "6px 10px",
-          borderRadius: 6,
-          border: "1px solid rgba(0,0,0,0.15)",
-          fontSize: 13,
-          textDecoration: "none",
-        }}
-        aria-label="Compartir en WhatsApp"
-        title="Compartir en WhatsApp"
-      >
+      {/* --- WhatsApp --- */}
+      <a href={whatsappHref} target="_blank" rel="noreferrer" style={btnStyle} aria-label="Compartir en WhatsApp">
         WhatsApp
       </a>
 
-      {/* Telegram */}
-      <a
-        href={telegramHref}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "6px 10px",
-          borderRadius: 6,
-          border: "1px solid rgba(0,0,0,0.15)",
-          fontSize: 13,
-          textDecoration: "none",
-        }}
-        aria-label="Compartir en Telegram"
-        title="Compartir en Telegram"
-      >
+      {/* --- Telegram --- */}
+      <a href={telegramHref} target="_blank" rel="noreferrer" style={btnStyle} aria-label="Compartir en Telegram">
         Telegram
       </a>
 
-      {/* Copiar link */}
-      <button
-        type="button"
-        onClick={copyLink}
-        style={{
-          padding: "6px 10px",
-          borderRadius: 6,
-          border: "1px solid rgba(0,0,0,0.15)",
-          background: "white",
-          cursor: "pointer",
-          fontSize: 13,
-        }}
-      >
+      {/* --- Copiar --- */}
+      <button type="button" onClick={copyLink} style={btnStyle}>
         {copied ? "Copiado ✅" : "Copiar enlace"}
       </button>
     </div>

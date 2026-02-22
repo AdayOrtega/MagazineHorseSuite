@@ -2,6 +2,7 @@ import { client } from "@/lib/sanity/client";
 import { articlesListQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata = {
   title: "Artículos — Pastor Alemán",
@@ -30,11 +31,12 @@ export default async function ArticulosPage() {
               <article className="overflow-hidden">
                 <div className="relative overflow-hidden rounded-lg aspect-[4/3] mb-4 bg-muted">
                   {img ? (
-                    <img
+                    <Image
                       src={img}
                       alt={a.title}
+                      width={1200}
+                      height={900}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
                     />
                   ) : null}
                 </div>
