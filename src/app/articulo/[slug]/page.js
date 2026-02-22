@@ -9,14 +9,17 @@ import { urlFor } from "@/lib/sanity/image";
 import { articleBySlugQuery, articleSlugsQuery } from "@/lib/sanity/queries";
 
 function normalizeSlugItem(item) {
-  // Soporta: "mi-slug" | {slug:"mi-slug"} | {slug:{current:"mi-slug"}} | {slug:{current:"mi-slug"}, ...}
+  // Soporta: "mi-slug" | {slug:"mi-slug"} | {slug:{current:"mi-slug"}} | {current:"mi-slug"}
   if (!item) return null;
   if (typeof item === "string") return item;
   if (typeof item.slug === "string") return item.slug;
   if (item.slug?.current) return item.slug.current;
-  // por si viene {current:"..."} a pelo
   if (item.current) return item.current;
   return null;
+}
+
+function isValidSlug(slug) {
+  return typeof slug === "string" && slug.trim().length > 0;
 }
 
 export async function generateStaticParams() {
@@ -25,12 +28,20 @@ export async function generateStaticParams() {
 
   return list
     .map(normalizeSlugItem)
-    .filter(Boolean)
+    .filter((s) => isValidSlug(s))
     .map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = params;
+  const slug = params?.slug;
+
+  // BLINDAJE: nunca ejecutar query con slug undefined
+  if (!isValidSlug(slug)) {
+    return {
+      title: "Artículo — Pastor Alemán",
+      description: "Artículo del portal Pastor Alemán.",
+    };
+  }
 
   const article = await client.fetch(articleBySlugQuery, { slug });
 
@@ -56,11 +67,7 @@ export async function generateMetadata({ params }) {
   return {
     title: `${article.title} — Pastor Alemán`,
     description,
-
-    alternates: {
-      canonical,
-    },
-
+    alternates: { canonical },
     openGraph: {
       title: article.title,
       description,
@@ -68,7 +75,6 @@ export async function generateMetadata({ params }) {
       type: "article",
       images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
     },
-
     twitter: {
       card: ogImage ? "summary_large_image" : "summary",
       title: article.title,
@@ -96,10 +102,12 @@ const ptComponents = {
 };
 
 export default async function ArticlePage({ params }) {
-  const { slug } = params;
+  const slug = params?.slug;
+
+  // BLINDAJE: nunca ejecutar query con slug undefined
+  if (!isValidSlug(slug)) return notFound();
 
   const article = await client.fetch(articleBySlugQuery, { slug });
-
   if (!article) return notFound();
 
   const heroUrl = article.mainImage
