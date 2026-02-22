@@ -44,7 +44,7 @@ export default function HomePage() {
           {categories.map((cat) => (
             <Link
               key={cat.slug}
-              href={`/categoria/${cat.slug}`}
+              href={`/seccion/${cat.slug}`}
               className="block rounded-2xl border bg-card p-5 shadow-sm hover:shadow-md transition focus:outline-none focus:ring-2 focus:ring-black/20"
               aria-label={`Ir a la sección ${cat.name}`}
             >
