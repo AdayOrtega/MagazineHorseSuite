@@ -2,6 +2,35 @@
 
 import { useMemo, useState } from "react";
 
+function Pill({ as = "a", href, onClick, children }) {
+  const base =
+    "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium " +
+    "bg-white/60 backdrop-blur hover:bg-white transition " +
+    "shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-black/20";
+
+  if (as === "button") {
+    return (
+      <button type="button" onClick={onClick} className={base}>
+        {children}
+      </button>
+    );
+  }
+
+  return (
+    <a href={href} target="_blank" rel="noreferrer" className={base}>
+      {children}
+    </a>
+  );
+}
+
+function Icon({ children }) {
+  return (
+    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border bg-white">
+      <span className="text-[11px] leading-none">{children}</span>
+    </span>
+  );
+}
+
 export default function ShareButtons({ title = "", canonicalUrl }) {
   const [copied, setCopied] = useState(false);
 
@@ -25,8 +54,7 @@ export default function ShareButtons({ title = "", canonicalUrl }) {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch (e) {
-      // fallback
+    } catch {
       const el = document.createElement("textarea");
       el.value = url;
       document.body.appendChild(el);
@@ -38,35 +66,31 @@ export default function ShareButtons({ title = "", canonicalUrl }) {
     }
   };
 
-  const Btn = ({ href, children, className }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className={
-        "inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-sm hover:bg-muted transition " +
-        (className || "")
-      }
-    >
-      {children}
-    </a>
-  );
-
   return (
     <div className="flex flex-wrap gap-2">
-      <Btn href={shareFacebook}>Facebook</Btn>
-      <Btn href={shareX}>X</Btn>
-      <Btn href={shareLinkedIn}>LinkedIn</Btn>
-      <Btn href={shareWhatsApp}>WhatsApp</Btn>
-      <Btn href={shareTelegram}>Telegram</Btn>
+      <Pill href={shareFacebook}>
+        <Icon>f</Icon> Facebook
+      </Pill>
 
-      <button
-        type="button"
-        onClick={copyToClipboard}
-        className="inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-sm hover:bg-muted transition"
-      >
-        {copied ? "¡Copiado!" : "Copiar enlace"}
-      </button>
+      <Pill href={shareX}>
+        <Icon>X</Icon> X
+      </Pill>
+
+      <Pill href={shareLinkedIn}>
+        <Icon>in</Icon> LinkedIn
+      </Pill>
+
+      <Pill href={shareWhatsApp}>
+        <Icon>wa</Icon> WhatsApp
+      </Pill>
+
+      <Pill href={shareTelegram}>
+        <Icon>tg</Icon> Telegram
+      </Pill>
+
+      <Pill as="button" onClick={copyToClipboard}>
+        <Icon>⧉</Icon> {copied ? "¡Copiado!" : "Copiar enlace"}
+      </Pill>
     </div>
   );
 }
