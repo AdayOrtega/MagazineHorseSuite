@@ -45,3 +45,53 @@ export const articleSlugsQuery = `
   "slug": slug.current
 }
 `;
+
+// src/lib/sanity/queries.js
+
+export const eventsListQuery = `
+*[
+  _type in ["event", "evento", "events", "eventos"]
+  && defined(title)
+]
+| order(coalesce(date, startDate, publishedAt, _createdAt) asc){
+  _id,
+  title,
+  description,
+  type,
+  country,
+  location,
+  date,
+  startDate,
+  endDate,
+  "slug": slug.current,
+
+  // imágenes: soporta distintos nombres posibles según schema
+  mainImage,
+  image,
+  coverImage
+}
+`;
+export const eventBySlugQuery = `
+*[
+  _type in ["event", "evento", "events", "eventos"]
+  && slug.current == $slug
+][0]{
+  _id,
+  title,
+  description,
+  type,
+  country,
+  location,
+  date,
+  startDate,
+  endDate,
+  "slug": slug.current,
+  mainImage,
+  image,
+  coverImage,
+  content,
+  body,
+  contenido
+}
+
+`;
