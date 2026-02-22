@@ -9,7 +9,6 @@ import { urlFor } from "@/lib/sanity/image";
 import { articleBySlugQuery, articleSlugsQuery } from "@/lib/sanity/queries";
 
 function normalizeSlugItem(item) {
-  // Soporta: "mi-slug" | {slug:"mi-slug"} | {slug:{current:"mi-slug"}} | {current:"mi-slug"}
   if (!item) return null;
   if (typeof item === "string") return item;
   if (typeof item.slug === "string") return item.slug;
@@ -33,9 +32,9 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const slug = params?.slug;
+  const p = await Promise.resolve(params);
+  const slug = p?.slug;
 
-  // BLINDAJE: nunca ejecutar query con slug undefined
   if (!isValidSlug(slug)) {
     return {
       title: "Artículo — Pastor Alemán",
@@ -67,7 +66,9 @@ export async function generateMetadata({ params }) {
   return {
     title: `${article.title} — Pastor Alemán`,
     description,
+
     alternates: { canonical },
+
     openGraph: {
       title: article.title,
       description,
@@ -75,6 +76,7 @@ export async function generateMetadata({ params }) {
       type: "article",
       images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
     },
+
     twitter: {
       card: ogImage ? "summary_large_image" : "summary",
       title: article.title,
@@ -102,9 +104,9 @@ const ptComponents = {
 };
 
 export default async function ArticlePage({ params }) {
-  const slug = params?.slug;
+  const p = await Promise.resolve(params);
+  const slug = p?.slug;
 
-  // BLINDAJE: nunca ejecutar query con slug undefined
   if (!isValidSlug(slug)) return notFound();
 
   const article = await client.fetch(articleBySlugQuery, { slug });
