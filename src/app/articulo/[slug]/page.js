@@ -14,7 +14,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
+  const { slug } = params;
+
   const article = await client.fetch(articleBySlugQuery, { slug });
 
   if (!article) {
@@ -24,28 +25,44 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const siteUrl =
+    (process.env.NEXT_PUBLIC_SITE_URL || "https://www.entusiastasdelpastoraleman.com").replace(/\/$/, "");
+
+  const canonical = `${siteUrl}/articulo/${slug}`;
+
   const ogSource = article.ogImage ?? article.mainImage;
-  const ogUrl = ogSource
+  const ogImage = ogSource
     ? urlFor(ogSource).width(1200).height(630).fit("crop").url()
     : undefined;
 
+  const description = article.excerpt || "Artículo del portal Pastor Alemán.";
+
   return {
     title: `${article.title} — Pastor Alemán`,
-    description: article.excerpt,
+    description,
+
+    alternates: {
+      canonical,
+    },
+
     openGraph: {
       title: article.title,
-      description: article.excerpt,
+      description,
+      url: canonical,
       type: "article",
-      images: ogUrl ? [{ url: ogUrl, width: 1200, height: 630 }] : [],
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
     },
+
     twitter: {
-      card: "summary_large_image",
+      card: ogImage ? "summary_large_image" : "summary",
       title: article.title,
-      description: article.excerpt,
-      images: ogUrl ? [ogUrl] : [],
+      description,
+      images: ogImage ? [ogImage] : [],
     },
   };
 }
+
+
 
 const ptComponents = {
   types: {
@@ -58,7 +75,7 @@ const ptComponents = {
 };
 
 export default async function ArticlePage({ params }) {
-  const { slug } = await params;
+  const { slug } = params;
   const article = await client.fetch(articleBySlugQuery, { slug });
 
   if (!article) return notFound();
