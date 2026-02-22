@@ -5,7 +5,6 @@ export async function POST(request) {
     const url = new URL(request.url);
     const secret = url.searchParams.get("secret");
 
-    // Secret guardado en Vercel y (opcional) en local
     if (!process.env.REVALIDATE_SECRET || secret !== process.env.REVALIDATE_SECRET) {
       return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
         status: 401,
@@ -13,33 +12,50 @@ export async function POST(request) {
       });
     }
 
-    // Sanity manda JSON (normalmente con info del doc)
     const payload = await request.json().catch(() => ({}));
 
-    // Intentamos detectar slug y tipo
-    const type = payload?._type || payload?.type;
+    // Sanity puede mandar distintas formas. Cubrimos varias:
+    const doc = payload?.document || payload?.result || payload;
+    const type = doc?._type || payload?._type || payload?.type;
+
     const slug =
+      doc?.slug?.current ||
+      doc?.slug ||
       payload?.slug?.current ||
       payload?.slug ||
       payload?.document?.slug?.current ||
       payload?.document?.slug;
 
-    // Revalidaciones mínimas para que “aparezca ya”
-    // Listados + home + sitemap/robots (por si los usas)
+    // Revalidaciones globales (siempre)
     revalidatePath("/");
     revalidatePath("/articulos");
+    revalidatePath("/eventos");
+    revalidatePath("/criadores"); // si no depende de Sanity, no molesta
     revalidatePath("/sitemap.xml");
     revalidatePath("/robots.txt");
 
-    // Si es un artículo y tenemos slug, revalida su página
-    if (type === "article" && slug) {
-      revalidatePath(`/articulo/${slug}`);
+    // Detalle por tipo (si existe slug y ruta)
+    if (slug) {
+      // Artículos (incluye “entrevistas” si las haces como articles)
+      if (type === "article") {
+        revalidatePath(`/articulo/${slug}`);
+      }
+
+      // Eventos (solo si tienes ruta de detalle; si no existe, no pasa nada)
+      if (type === "event") {
+        revalidatePath(`/eventos/${slug}`);
+        revalidatePath(`/evento/${slug}`); // por si usaste singular
+      }
+
+      // Categorías/Secciones (si tu web usa /seccion/[slug])
+      if (type === "category") {
+        revalidatePath(`/seccion/${slug}`);
+        revalidatePath(`/categoria/${slug}`); // por si algún día lo usas
+      }
     }
 
-    // Si tienes secciones dependientes del artículo y lo puedes derivar,
-    // aquí podrías revalidar también /seccion/<slug>.
-    // Ejemplo si Sanity manda section.slug.current:
-    const sectionSlug = payload?.section?.slug?.current || payload?.sectionSlug;
+    // Si Sanity manda sección relacionada explícita
+    const sectionSlug = doc?.section?.slug?.current || doc?.sectionSlug || payload?.sectionSlug;
     if (sectionSlug) {
       revalidatePath(`/seccion/${sectionSlug}`);
     }
