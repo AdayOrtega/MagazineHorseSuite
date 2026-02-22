@@ -8,9 +8,25 @@ import { client } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { articleBySlugQuery, articleSlugsQuery } from "@/lib/sanity/queries";
 
+function normalizeSlugItem(item) {
+  // Soporta: "mi-slug" | {slug:"mi-slug"} | {slug:{current:"mi-slug"}} | {slug:{current:"mi-slug"}, ...}
+  if (!item) return null;
+  if (typeof item === "string") return item;
+  if (typeof item.slug === "string") return item.slug;
+  if (item.slug?.current) return item.slug.current;
+  // por si viene {current:"..."} a pelo
+  if (item.current) return item.current;
+  return null;
+}
+
 export async function generateStaticParams() {
   const slugs = await client.fetch(articleSlugsQuery);
-  return (slugs || []).map((s) => ({ slug: s.slug }));
+  const list = Array.isArray(slugs) ? slugs : [];
+
+  return list
+    .map(normalizeSlugItem)
+    .filter(Boolean)
+    .map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }) {
@@ -62,20 +78,26 @@ export async function generateMetadata({ params }) {
   };
 }
 
-
-
 const ptComponents = {
   types: {
     image: ({ value }) => {
       const src = urlFor(value).width(1400).fit("max").auto("format").url();
       // eslint-disable-next-line @next/next/no-img-element
-      return <img src={src} alt={value?.alt || ""} className="w-full rounded-lg my-8" loading="lazy" />;
+      return (
+        <img
+          src={src}
+          alt={value?.alt || ""}
+          className="w-full rounded-lg my-8"
+          loading="lazy"
+        />
+      );
     },
   },
 };
 
 export default async function ArticlePage({ params }) {
   const { slug } = params;
+
   const article = await client.fetch(articleBySlugQuery, { slug });
 
   if (!article) return notFound();
