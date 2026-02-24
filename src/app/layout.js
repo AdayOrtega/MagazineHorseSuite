@@ -3,9 +3,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Pastor Alemán — Revista Digital",
+  title: "Magazine HorseSuite — Mundo del Caballo",
   description:
-    "La revista digital de referencia en español sobre el Pastor Alemán. Belleza, trabajo, cría responsable, adiestramiento y comunidad.",
+    "Revista digital sobre el mundo del caballo: doma clásica, salto, doma vaquera, cría responsable (PRE) y cultura ecuestre.",
 };
 
 export default function RootLayout({ children }) {

@@ -11,10 +11,10 @@ const Footer = () => {
               <div className="w-8 h-8 rounded-full gradient-gold flex items-center justify-center">
                 <span className="text-primary-foreground font-display text-sm font-bold">PA</span>
               </div>
-              <span className="font-display text-xl font-bold">Pastor Alemán</span>
+              <span className="font-display text-xl font-bold">Magazine HorseSuite</span>
             </div>
             <p className="text-sm opacity-70 font-body leading-relaxed">
-              La revista digital de referencia en español sobre el Pastor Alemán. Belleza, trabajo, cría responsable y más.
+              Revista digital sobre el mundo del caballo: doma clásica, salto, doma vaquera, cría (PRE) y cultura ecuestre.
             </p>
           </div>
 
@@ -61,7 +61,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center">
           <p className="text-xs opacity-50 font-body">
-            © 2026 Pastor Alemán — Revista Digital. Todos los derechos reservados.
+            © 2026 Magazine HorseSuite. Todos los derechos reservados.
           </p>
         </div>
       </div>

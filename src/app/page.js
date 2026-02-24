@@ -32,7 +32,7 @@ export default function HomePage() {
         </div>
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {featuredArticles.map((article) => (
-            <ArticleCard key={article.slug} article={article} variant="featured" />
+            <ArticleCard key={article.slug || article.id} article={article} variant="featured" />
           ))}
         </div>
       </section>
@@ -66,7 +66,7 @@ export default function HomePage() {
         </div>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {latestArticles.map((article) => (
-            <ArticleCard key={article.slug} article={article} />
+            <ArticleCard key={article.slug || article.id} article={article} />
           ))}
         </div>
       </section>

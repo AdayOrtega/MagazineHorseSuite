@@ -16,7 +16,7 @@ const ArticleCard = ({ article, variant = "default" }) => {
           <div className="absolute inset-0 gradient-dark-overlay" />
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
             <span className="inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-primary text-primary-foreground rounded-sm mb-3 font-body">
-              {article.category}
+              {article.category?.title ?? article.category?.name ?? article.category}
             </span>
             <h3 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold text-primary-foreground leading-tight mb-2">
               {article.title}
@@ -48,7 +48,7 @@ const ArticleCard = ({ article, variant = "default" }) => {
         />
         <div className="flex-1 min-w-0">
           <span className="text-xs font-semibold uppercase tracking-wider text-primary font-body">
-            {article.category}
+            {article.category?.title ?? article.category?.name ?? article.category}
           </span>
           <h4 className="font-display text-lg font-semibold text-foreground leading-snug mt-1 group-hover:text-primary transition-colors line-clamp-2">
             {article.title}
@@ -73,7 +73,7 @@ const ArticleCard = ({ article, variant = "default" }) => {
           />
         </div>
         <span className="text-xs font-semibold uppercase tracking-wider text-primary font-body">
-          {article.category}
+          {article.category?.title ?? article.category?.name ?? article.category}
         </span>
         <h3 className="font-display text-xl font-bold text-foreground leading-snug mt-1 group-hover:text-primary transition-colors">
           {article.title}

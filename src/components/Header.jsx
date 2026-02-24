@@ -25,7 +25,7 @@ const Header = () => {
             </div>
             <div>
               <h1 className="font-display text-2xl font-bold tracking-tight text-foreground leading-none">
-                Pastor Alemán
+                Magazine HorseSuite
               </h1>
               <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground font-body">
                 Revista Digital
