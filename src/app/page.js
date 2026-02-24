@@ -1,10 +1,17 @@
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
-import { articles, categories } from "@/data/mockData";
+import { getSections } from "@/lib/getSections";
+import { getFeaturedArticles } from "@/lib/getFeaturedArticles";
+import { getLatestArticles } from "@/lib/getLatestArticles";
 
-export default function HomePage() {
-  const featuredArticles = articles.filter((a) => a.featured);
-  const latestArticles = articles.filter((a) => !a.featured).slice(0, 4);
+export default async function HomePage() {
+  const [sections, featuredArticles] = await Promise.all([
+    getSections(),
+    getFeaturedArticles(2),
+  ]);
+
+  const featuredIds = (featuredArticles || []).map((a) => a._id).filter(Boolean);
+  const latestArticles = await getLatestArticles(4, featuredIds);
 
   return (
     <>
@@ -16,10 +23,10 @@ export default function HomePage() {
               Revista Digital
             </p>
             <h2 className="mt-3 font-display text-4xl md:text-5xl font-bold tracking-tight">
-              El Portal de Referencia del Pastor Alemán en Español
+              Magazine HorseSuite
             </h2>
             <p className="mt-4 text-base md:text-lg text-muted-foreground font-body leading-relaxed">
-              Belleza, trabajo, cría responsable, adiestramiento y la comunidad más apasionada.
+              Doma clásica, salto, doma vaquera, salud, entrenamiento, yeguadas y cultura ecuestre.
             </p>
           </div>
         </div>
@@ -30,10 +37,21 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <h3 className="font-display text-2xl font-bold">Destacados</h3>
         </div>
+
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {featuredArticles.map((article) => (
-            <ArticleCard key={article.slug || article.id} article={article} variant="featured" />
-          ))}
+          {(featuredArticles || []).length > 0 ? (
+            featuredArticles.map((article) => (
+              <ArticleCard
+                key={article.slug || article._id}
+                article={article}
+                variant="featured"
+              />
+            ))
+          ) : (
+            <div className="col-span-full rounded-2xl border bg-card p-6 text-muted-foreground font-body">
+              Aún no hay artículos publicados. Crea el primero en Sanity y aparecerá aquí.
+            </div>
+          )}
         </div>
       </section>
 
@@ -41,19 +59,21 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-10">
         <h3 className="font-display text-2xl font-bold">Explora Nuestras Secciones</h3>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {categories.map((cat) => (
+          {(sections || []).map((cat) => (
             <Link
               key={cat.slug}
               href={`/seccion/${cat.slug}`}
               className="block rounded-2xl border bg-card p-5 shadow-sm hover:shadow-md transition focus:outline-none focus:ring-2 focus:ring-black/20"
-              aria-label={`Ir a la sección ${cat.name}`}
+              aria-label={`Ir a la sección ${cat.title || cat.name}`}
             >
               <div className="text-sm font-body uppercase tracking-wide text-muted-foreground">
-                {cat.name}
+                {cat.title || cat.name}
               </div>
-              <p className="mt-2 text-sm text-muted-foreground font-body leading-relaxed">
-                {cat.description}
-              </p>
+              {cat.description ? (
+                <p className="mt-2 text-sm text-muted-foreground font-body leading-relaxed">
+                  {cat.description}
+                </p>
+              ) : null}
             </Link>
           ))}
         </div>
@@ -64,10 +84,17 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <h3 className="font-display text-2xl font-bold">Últimos Artículos</h3>
         </div>
+
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {latestArticles.map((article) => (
-            <ArticleCard key={article.slug || article.id} article={article} />
-          ))}
+          {(latestArticles || []).length > 0 ? (
+            latestArticles.map((article) => (
+              <ArticleCard key={article.slug || article._id} article={article} />
+            ))
+          ) : (
+            <div className="col-span-full rounded-2xl border bg-card p-6 text-muted-foreground font-body">
+              Publica artículos en Sanity para verlos aquí.
+            </div>
+          )}
         </div>
       </section>
     </>
