@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { breeders } from "@/data/mockData";
 
 export const metadata = {
@@ -10,10 +11,10 @@ export default function BreedersPage() {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-3xl mx-auto text-center mb-12">
-        <h1 className="font-display text-4xl md:text-5xl font-bold">Directorio de Criadores</h1>
+        <h1 className="font-display text-4xl md:text-5xl font-bold">Directorio de Yeguadas y Ganaderias</h1>
         <div className="section-divider mt-4" />
         <p className="text-muted-foreground font-body mt-6">
-          Encuentra criadores comprometidos con la cría responsable, salud y temperamento.
+          Encuentra los ganaderos más comprometidos con la raza:<b> morfología, salud y funcionalidad.</b>
         </p>
       </div>
 
@@ -21,11 +22,12 @@ export default function BreedersPage() {
         {breeders.map((b) => (
           <div key={b.id} className="rounded-2xl border bg-card shadow-sm overflow-hidden">
             <div className="aspect-[16/10] overflow-hidden">
-              <img
+              <Image
                 src={b.image}
                 alt={b.kennel}
                 className="h-full w-full object-cover"
-                loading="lazy"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             </div>
 
@@ -41,7 +43,7 @@ export default function BreedersPage() {
               </div>
 
               <div className="mt-3 text-sm text-muted-foreground font-body">
-                {b.region}, {b.country}
+                {b.region} {b.country}
               </div>
 
               <p className="mt-3 text-sm text-muted-foreground font-body leading-relaxed">
@@ -51,11 +53,11 @@ export default function BreedersPage() {
               <div className="mt-4">
                 {b.available ? (
                   <span className="inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-                    Camadas disponibles
+                    Potros y caballos disponibles
                   </span>
                 ) : (
                   <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
-                    Sin camadas
+                    Sin productos disponibles actualmente
                   </span>
                 )}
               </div>
