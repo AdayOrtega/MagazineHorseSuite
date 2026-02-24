@@ -31,3 +31,4 @@ logs/
 
 # Sanity
 .sanity/
+.env.local
