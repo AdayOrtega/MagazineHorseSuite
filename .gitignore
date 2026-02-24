@@ -32,3 +32,6 @@ logs/
 # Sanity
 .sanity/
 .env.local
+studio/magazinehorsesuite-studio/
+studio/
+studio/
