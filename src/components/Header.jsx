@@ -3,10 +3,23 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { categories } from "@/data/mockData";
 
-const Header = () => {
+const Header = ({ sections = [] }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const normalizedSections = (sections || [])
+    .map((s) => {
+      const slugStr = typeof s?.slug === "string" ? s.slug : s?.slug?.current;
+      if (!slugStr) return null;
+
+      return {
+        slug: slugStr,
+        name: s?.title || s?.name || slugStr,
+        order: typeof s?.order === "number" ? s.order : 9999,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.order - b.order);
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
@@ -43,7 +56,7 @@ const Header = () => {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            {categories.slice(0, 6).map((cat) => (
+            {normalizedSections.slice(0, 6).map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/seccion/${cat.slug}`}
@@ -61,10 +74,10 @@ const Header = () => {
             </Link>
 
             <Link
-              href="/criadores"
+              href="/yeguadas"
               className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors font-body"
             >
-              Criadores
+              Yeguadas
             </Link>
 
             <Link
@@ -80,7 +93,7 @@ const Header = () => {
         {mobileOpen && (
           <nav className="lg:hidden pb-4 border-t border-border pt-4 animate-fade-in">
             <div className="grid grid-cols-2 gap-2">
-              {categories.map((cat) => (
+              {normalizedSections.map((cat) => (
                 <Link
                   key={cat.slug}
                   href={`/seccion/${cat.slug}`}
@@ -100,11 +113,11 @@ const Header = () => {
               </Link>
 
               <Link
-                href="/criadores"
+                href="/yeguadas"
                 onClick={() => setMobileOpen(false)}
                 className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors font-body"
               >
-                Criadores
+                Yeguadas
               </Link>
 
               <Link
