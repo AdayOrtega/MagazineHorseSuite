@@ -37,8 +37,8 @@ export async function generateMetadata({ params }) {
 
   if (!isValidSlug(slug)) {
     return {
-      title: "Artículo — Pastor Alemán",
-      description: "Artículo del portal Pastor Alemán.",
+      title: "Artículo — Magazine HorseSuite",
+      description: "Artículo de Magazine HorseSuite.",
     };
   }
 
@@ -46,29 +46,29 @@ export async function generateMetadata({ params }) {
 
   if (!article) {
     return {
-      title: "Artículo no encontrado — Pastor Alemán",
+      title: "Artículo no encontrado — Magazine HorseSuite",
       description: "El artículo solicitado no existe.",
     };
   }
 
-  const siteUrl =
-    (process.env.NEXT_PUBLIC_SITE_URL || "https://www.entusiastasdelpastoraleman.com").replace(/\/$/, "");
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://magazine.horsesuite.app").replace(
+    /\/$/,
+    ""
+  );
 
   const canonical = `${siteUrl}/articulo/${slug}`;
 
-  const ogSource = article.ogImage ?? article.mainImage;
+  const ogSource = article.ogImage ?? article.coverImage ?? article.mainImage;
   const ogImage = ogSource
-    ? urlFor(ogSource).width(1200).height(630).fit("crop").url()
+    ? urlFor(ogSource).width(1200).height(630).fit("crop").auto("format").url()
     : undefined;
 
-  const description = article.excerpt || "Artículo del portal Pastor Alemán.";
+  const description = article.excerpt || "Artículo de Magazine HorseSuite.";
 
   return {
-    title: `${article.title} — Pastor Alemán`,
+    title: `${article.title} — Magazine HorseSuite`,
     description,
-
     alternates: { canonical },
-
     openGraph: {
       title: article.title,
       description,
@@ -76,7 +76,6 @@ export async function generateMetadata({ params }) {
       type: "article",
       images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
     },
-
     twitter: {
       card: ogImage ? "summary_large_image" : "summary",
       title: article.title,
@@ -92,12 +91,60 @@ const ptComponents = {
       const src = urlFor(value).width(1400).fit("max").auto("format").url();
       // eslint-disable-next-line @next/next/no-img-element
       return (
-        <img
-          src={src}
-          alt={value?.alt || ""}
-          className="w-full rounded-lg my-8"
-          loading="lazy"
-        />
+        <figure className="my-8">
+          <img
+            src={src}
+            alt={value?.alt || ""}
+            className="w-full rounded-lg"
+            loading="lazy"
+          />
+          {value?.caption ? (
+            <figcaption className="mt-2 text-xs text-muted-foreground font-body">
+              {value.caption}
+            </figcaption>
+          ) : null}
+        </figure>
+      );
+    },
+
+    mediaText: ({ value }) => {
+      const img = value?.image;
+      const imgUrl = img ? urlFor(img).width(1200).fit("max").auto("format").url() : null;
+      const isImageRight = value?.layout === "imageRight";
+      const content = Array.isArray(value?.content) ? value.content : [];
+
+      // Fallback: si no hay imagen, renderiza solo texto
+      if (!imgUrl) {
+        return (
+          <div className="my-10">
+            <PortableText value={content} components={ptComponents} />
+          </div>
+        );
+      }
+
+      return (
+        <section className="my-10 grid gap-6 md:grid-cols-2 md:items-start">
+          <div className={isImageRight ? "md:order-2" : "md:order-1"}>
+            <div className="overflow-hidden rounded-lg bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imgUrl}
+                alt={img?.alt || ""}
+                className="w-full h-auto object-cover"
+                loading="lazy"
+              />
+            </div>
+            {img?.caption ? (
+              <p className="mt-2 text-xs text-muted-foreground font-body">{img.caption}</p>
+            ) : null}
+          </div>
+
+          <div className={isImageRight ? "md:order-1" : "md:order-2"}>
+            <div className="article-prose">
+              <PortableText value={content} components={ptComponents} />
+            </div>
+          </div>
+        </section>
       );
     },
   },
@@ -112,8 +159,14 @@ export default async function ArticlePage({ params }) {
   const article = await client.fetch(articleBySlugQuery, { slug });
   if (!article) return notFound();
 
-  const heroUrl = article.mainImage
-    ? urlFor(article.mainImage).width(1600).height(900).fit("crop").auto("format").url()
+  // Compat: section (nuevo) o category (viejo)
+  const section = article.section || article.category || null;
+
+  // Compat: coverImage (nuevo) o mainImage (viejo)
+  const heroSource = article.coverImage ?? article.mainImage ?? null;
+
+  const heroUrl = heroSource
+    ? urlFor(heroSource).width(1600).height(900).fit("crop").auto("format").url()
     : null;
 
   return (
@@ -121,10 +174,10 @@ export default async function ArticlePage({ params }) {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <Link
-            href={article.category?.slug ? `/seccion/${article.category.slug}` : "/articulos"}
+            href={section?.slug ? `/seccion/${section.slug}` : "/articulos"}
             className="text-xs font-semibold uppercase tracking-wider text-primary font-body"
           >
-            {article.category?.title || "Artículos"}
+            {section?.title || "Artículos"}
           </Link>
 
           <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground leading-tight mt-3">
@@ -154,7 +207,7 @@ export default async function ArticlePage({ params }) {
           <div className="relative overflow-hidden rounded-lg aspect-[16/9] mb-10 bg-muted">
             <Image
               src={heroUrl}
-              alt={article.mainImage?.alt || article.title}
+              alt={heroSource?.alt || article.title}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 900px"
