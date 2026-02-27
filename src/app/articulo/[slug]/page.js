@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { PortableText } from "@portabletext/react";
+import PortableTextRenderer from "@/components/PortableTextRenderer";
 import ShareButtons from "@/components/ShareButtons";
 
 import { client } from "@/lib/sanity/client";
@@ -85,71 +85,6 @@ export async function generateMetadata({ params }) {
   };
 }
 
-const ptComponents = {
-  types: {
-    image: ({ value }) => {
-      const src = urlFor(value).width(1400).fit("max").auto("format").url();
-      // eslint-disable-next-line @next/next/no-img-element
-      return (
-        <figure className="my-8">
-          <img
-            src={src}
-            alt={value?.alt || ""}
-            className="w-full rounded-lg"
-            loading="lazy"
-          />
-          {value?.caption ? (
-            <figcaption className="mt-2 text-xs text-muted-foreground font-body">
-              {value.caption}
-            </figcaption>
-          ) : null}
-        </figure>
-      );
-    },
-
-    mediaText: ({ value }) => {
-      const img = value?.image;
-      const imgUrl = img ? urlFor(img).width(1200).fit("max").auto("format").url() : null;
-      const isImageRight = value?.layout === "imageRight";
-      const content = Array.isArray(value?.content) ? value.content : [];
-
-      // Fallback: si no hay imagen, renderiza solo texto
-      if (!imgUrl) {
-        return (
-          <div className="my-10">
-            <PortableText value={content} components={ptComponents} />
-          </div>
-        );
-      }
-
-      return (
-        <section className="my-10 grid gap-6 md:grid-cols-2 md:items-start">
-          <div className={isImageRight ? "md:order-2" : "md:order-1"}>
-            <div className="overflow-hidden rounded-lg bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imgUrl}
-                alt={img?.alt || ""}
-                className="w-full h-auto object-cover"
-                loading="lazy"
-              />
-            </div>
-            {img?.caption ? (
-              <p className="mt-2 text-xs text-muted-foreground font-body">{img.caption}</p>
-            ) : null}
-          </div>
-
-          <div className={isImageRight ? "md:order-1" : "md:order-2"}>
-            <div className="article-prose">
-              <PortableText value={content} components={ptComponents} />
-            </div>
-          </div>
-        </section>
-      );
-    },
-  },
-};
-
 export default async function ArticlePage({ params }) {
   const p = await Promise.resolve(params);
   const slug = p?.slug;
@@ -211,13 +146,12 @@ export default async function ArticlePage({ params }) {
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 900px"
-              priority
-            />
+              priority />
           </div>
         ) : null}
 
         <article className="prose prose-lg max-w-none prose-ol:list-decimal prose-ul:list-disc prose-li:my-1">
-          <PortableText value={(article.bodyLayout && article.bodyLayout.length ? article.bodyLayout : (article.body || []))} components={ptComponents} />
+          <PortableTextRenderer value={(article.content && article.content.length) ? article.content : ((article.bodyLayout && article.bodyLayout.length) ? article.bodyLayout : (article.body || []))} />
         </article>
 
         <ShareButtons title={article.title} />
