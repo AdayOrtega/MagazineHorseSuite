@@ -1,79 +1,104 @@
-"use client";
-
 import { PortableText } from "@portabletext/react";
+import { urlFor } from "@/lib/sanity/image";
 
-const listStyleByLevel = (level = 1, type = "number") => {
-  // type: "number" | "bullet"
-  if (type === "bullet") {
-    // bullets: •, ◦, ▪
-    if (level === 1) return "list-disc";
-    if (level === 2) return "list-circle";
-    return "list-square";
-  }
+const ptComponents = {
+  block: {
+    h2: ({ children }) => <h2 className="mt-10">{children}</h2>,
+    h3: ({ children }) => <h3 className="mt-8">{children}</h3>,
+    normal: ({ children }) => <p className="mt-4">{children}</p>,
+  },
+  list: {
+    bullet: ({ children }) => <ul className="mt-4">{children}</ul>,
+    number: ({ children }) => <ol className="mt-4">{children}</ol>,
+  },
+  listItem: {
+    bullet: ({ children }) => <li className="mt-2">{children}</li>,
+    number: ({ children }) => <li className="mt-2">{children}</li>,
+  },
+  types: {
+    image: ({ value }) => {
+      const src = value ? urlFor(value).width(1600).auto("format").url() : null;
+      if (!src) return null;
+      // eslint-disable-next-line @next/next/no-img-element
+      return (
+        <figure className="my-8">
+          <img src={src} alt={value?.alt || ""} className="w-full rounded-lg" loading="lazy" />
+          {value?.caption ? (
+            <figcaption className="mt-2 text-xs text-muted-foreground font-body">
+              {value.caption}
+            </figcaption>
+          ) : null}
+        </figure>
+      );
+    },
 
-  // numbers: 1., a., i.
-  if (level === 1) return "list-decimal";
-  if (level === 2) return "list-[lower-alpha]";
-  return "list-[lower-roman]";
+    callout: ({ value }) => {
+      const tone = value?.tone || "info"; // info|warning|danger|success
+      const toneClass =
+        tone === "warning"
+          ? "border-yellow-400/60 bg-yellow-400/10"
+          : tone === "danger"
+          ? "border-red-400/60 bg-red-400/10"
+          : tone === "success"
+          ? "border-emerald-400/60 bg-emerald-400/10"
+          : "border-primary/30 bg-primary/5";
+
+      return (
+        <aside className={`my-8 rounded-xl border p-5 ${toneClass}`}>
+          {value?.title ? (
+            <div className="font-display font-semibold text-foreground mb-2">{value.title}</div>
+          ) : null}
+          <div className="article-prose">
+            <PortableText value={value?.content || []} components={ptComponents} />
+          </div>
+        </aside>
+      );
+    },
+
+    quoteBlock: ({ value }) => {
+      return (
+        <blockquote className="my-8 border-l-4 border-primary/40 pl-5 italic">
+          <div className="article-prose">
+            <PortableText value={value?.content || []} components={ptComponents} />
+          </div>
+          {value?.author ? (
+            <footer className="mt-3 text-sm not-italic text-muted-foreground">— {value.author}</footer>
+          ) : null}
+        </blockquote>
+      );
+    },
+
+    mediaText: ({ value }) => {
+      const layout = value?.layout || "imageLeft"; // imageLeft|imageRight
+      const isImageRight = layout === "imageRight";
+      const img = value?.image;
+      const src = img ? urlFor(img).width(1400).auto("format").url() : null;
+
+      return (
+        <section className="my-10 grid gap-6 md:grid-cols-2 items-start">
+          <div className={isImageRight ? "md:order-2" : "md:order-1"}>
+            {src ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={src} alt={value?.alt || img?.alt || ""} className="w-full rounded-lg" loading="lazy" />
+            ) : (
+              <div className="w-full aspect-[4/3] rounded-lg bg-muted" />
+            )}
+            {value?.caption ? (
+              <p className="mt-2 text-xs text-muted-foreground font-body">{value.caption}</p>
+            ) : null}
+          </div>
+
+          <div className={isImageRight ? "md:order-1" : "md:order-2"}>
+            <div className="article-prose">
+              <PortableText value={value?.content || []} components={ptComponents} />
+            </div>
+          </div>
+        </section>
+      );
+    },
+  },
 };
 
 export default function PortableTextRenderer({ value }) {
-  const components = {
-    block: {
-      normal: ({ children }) => (
-        <p className="my-4 text-base leading-7 text-foreground">{children}</p>
-      ),
-      h2: ({ children }) => (
-        <h2 className="mt-10 mb-4 font-display text-2xl font-bold">{children}</h2>
-      ),
-      h3: ({ children }) => (
-        <h3 className="mt-8 mb-3 font-display text-xl font-bold">{children}</h3>
-      ),
-      blockquote: ({ children }) => (
-        <blockquote className="my-6 border-l-4 border-border pl-4 italic text-muted-foreground">
-          {children}
-        </blockquote>
-      ),
-    },
-
-    list: {
-      bullet: ({ children }) => (
-        <ul className="my-4 ml-6 space-y-2 list-disc">{children}</ul>
-      ),
-      number: ({ children }) => (
-        <ol className="my-4 ml-6 space-y-2 list-decimal">{children}</ol>
-      ),
-    },
-
-    // Aquí controlamos nivel (level) y estilo por nivel
-    listItem: {
-      bullet: ({ children, value }) => {
-        const level = value?.level || 1;
-        const cls = listStyleByLevel(level, "bullet");
-        return <li className={`ml-4 ${cls}`}>{children}</li>;
-      },
-      number: ({ children, value }) => {
-        const level = value?.level || 1;
-        const cls = listStyleByLevel(level, "number");
-        return <li className={`ml-4 ${cls}`}>{children}</li>;
-      },
-    },
-
-    marks: {
-      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-      em: ({ children }) => <em className="italic">{children}</em>,
-      link: ({ children, value }) => (
-        <a
-          href={value?.href}
-          target={value?.href?.startsWith("http") ? "_blank" : undefined}
-          rel={value?.href?.startsWith("http") ? "noopener noreferrer" : undefined}
-          className="underline underline-offset-4 hover:text-primary"
-        >
-          {children}
-        </a>
-      ),
-    },
-  };
-
-  return <PortableText value={value} components={components} />;
+  return <PortableText value={value || []} components={ptComponents} />;
 }
