@@ -102,7 +102,13 @@ export default async function ArticlePage({ params }) {
 
   const heroUrl = heroSource
     ? urlFor(heroSource).width(1600).height(900).fit("crop").auto("format").url()
-    : null;
+    : null;;
+
+  const blocks = (article.content && article.content.length)
+    ? article.content
+    : ((article.bodyLayout && article.bodyLayout.length)
+      ? article.bodyLayout
+      : (article.body || []));
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -151,7 +157,7 @@ export default async function ArticlePage({ params }) {
         ) : null}
 
         <article className="prose prose-lg max-w-none prose-ol:list-decimal prose-ul:list-disc prose-li:my-1">
-          <PortableTextRenderer value={(article.content && article.content.length) ? article.content : ((article.bodyLayout && article.bodyLayout.length) ? article.bodyLayout : (article.body || []))} />
+          <PortableTextRenderer value={blocks} />
         </article>
 
         <ShareButtons title={article.title} />

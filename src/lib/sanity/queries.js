@@ -1,3 +1,7 @@
+/* =========================
+   Artículos
+   ========================= */
+
 export const articleSlugsQuery = `*[_type=="article" && defined(slug.current)][]{ "slug": slug.current }`;
 
 export const articleBySlugQuery = `*[_type=="article" && slug.current==$slug][0]{
@@ -11,15 +15,25 @@ export const articleBySlugQuery = `*[_type=="article" && slug.current==$slug][0]
   coverImage,
   "mainImage": coverImage,
   "coverImageUrl": coverImage.asset->url,
-  body,
-  bodyLayout[]{
+
+  // ✅ Page builder REAL (lo que estás usando en Studio)
+  content[]{
     ...,
-    // normaliza subcampos típicos en bloques
     _type == "mediaText" => {
       ...,
       image{..., asset->},
       content[]
     },
+    _type == "richText" => { ..., content[] },
+    _type == "callout" => { ..., content[] },
+    _type == "quoteBlock" => { ... }
+  },
+
+  // ✅ compat (por si tienes artículos antiguos)
+  body,
+  bodyLayout[]{
+    ...,
+    _type == "mediaText" => { ..., image{..., asset->}, content[] },
     _type == "richText" => { ..., content[] },
     _type == "callout" => { ..., content[] },
     _type == "quoteBlock" => { ... }
