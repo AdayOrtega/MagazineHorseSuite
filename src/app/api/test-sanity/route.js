@@ -9,11 +9,23 @@ const sanity = createClient({
 
 export async function GET() {
   const sections = await sanity.fetch(
-    `*[_type=="section"]|order(order asc){title, "slug": slug.current, order}`
+    `*[_type=="section"]|order(order asc){
+      title,
+      "slug": slug.current,
+      order
+    }`
   );
 
   const articles = await sanity.fetch(
-    `*[_type=="article"]|order(publishedAt desc)[0...5]{title, "slug": slug.current, publishedAt}`
+    `*[_type=="article"]|order(publishedAt desc)[0...5]{
+      _id,
+      title,
+      "slug": slug.current,
+      excerpt,
+      publishedAt,
+      "section": section->{title,"slug": slug.current},
+      "coverImageUrl": coverImage.asset->url
+    }`
   );
 
   return Response.json({ ok: true, sections, articles });

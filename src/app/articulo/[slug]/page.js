@@ -58,7 +58,7 @@ export async function generateMetadata({ params }) {
 
   const canonical = `${siteUrl}/articulo/${slug}`;
 
-  const ogSource = article.ogImage ?? article.coverImage ?? article.mainImage;
+  const ogSource = article.ogImage ?? article.coverImage ?? article.coverImage;
   const ogImage = ogSource
     ? urlFor(ogSource).width(1200).height(630).fit("crop").auto("format").url()
     : undefined;
@@ -160,10 +160,10 @@ export default async function ArticlePage({ params }) {
   if (!article) return notFound();
 
   // Compat: section (nuevo) o category (viejo)
-  const section = article.section || article.category || null;
+  const section = article.section || article.section || null;
 
   // Compat: coverImage (nuevo) o mainImage (viejo)
-  const heroSource = article.coverImage ?? article.mainImage ?? null;
+  const heroSource = article.coverImage ?? article.coverImage ?? null;
 
   const heroUrl = heroSource
     ? urlFor(heroSource).width(1600).height(900).fit("crop").auto("format").url()
@@ -216,8 +216,8 @@ export default async function ArticlePage({ params }) {
           </div>
         ) : null}
 
-        <article className="article-prose">
-          <PortableText value={article.body || []} components={ptComponents} />
+        <article className="prose prose-lg max-w-none prose-ol:list-decimal prose-ul:list-disc prose-li:my-1">
+          <PortableText value={(article.bodyLayout && article.bodyLayout.length ? article.bodyLayout : (article.body || []))} components={ptComponents} />
         </article>
 
         <ShareButtons title={article.title} />
