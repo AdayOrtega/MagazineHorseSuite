@@ -1,24 +1,29 @@
 export const articleSlugsQuery = `*[_type=="article" && defined(slug.current)][]{ "slug": slug.current }`;
 
-export const articleBySlugQuery = `*[_type=="article" && slug.current == $slug][0]{
+export const articleBySlugQuery = `*[_type=="article" && slug.current==$slug][0]{
   _id,
   title,
+  "slug": slug.current,
   excerpt,
   publishedAt,
-  "slug": slug.current,
-
-  // ✅ schema actual
-  "section": section->{ title, "slug": slug.current },
-
-  // ✅ portada
+  "section": section->{title, "slug": slug.current},
+  "category": section->{title, "slug": slug.current},
   coverImage,
+  "mainImage": coverImage,
   "coverImageUrl": coverImage.asset->url,
-
-  // ✅ contenido clásico
   body,
-
-  // ✅ contenido maquetación (si existe)
-  bodyLayout
+  bodyLayout[]{
+    ...,
+    // normaliza subcampos típicos en bloques
+    _type == "mediaText" => {
+      ...,
+      image{..., asset->},
+      content[]
+    },
+    _type == "richText" => { ..., content[] },
+    _type == "callout" => { ..., content[] },
+    _type == "quoteBlock" => { ... }
+  }
 }`;
 
 export const latestArticlesQuery = `*[_type=="article"]|order(publishedAt desc)[0...$limit]{
@@ -73,5 +78,6 @@ export const articlesListQuery = `*[_type=="article"]|order(publishedAt desc){
   excerpt,
   publishedAt,
   "section": section->{title, "slug": slug.current},
+  "category": section->{title, "slug": slug.current},
   "coverImageUrl": coverImage.asset->url
 }`;
