@@ -55,7 +55,7 @@ const Footer = () => {
             <p className="text-sm opacity-70 font-body leading-relaxed">
               ¿Tienes una historia que contar? ¿Quieres colaborar con nosotros?
             </p>
-            <p className="text-sm opacity-70 font-body mt-2">info@entusiastasdelpastoraleman.com</p>
+            <p className="text-sm opacity-70 font-body mt-2">admin@horsesuite.app</p>
           </div>
         </div>
 
