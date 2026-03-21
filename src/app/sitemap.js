@@ -30,7 +30,6 @@ export default async function sitemap() {
   let slugs = [];
 try {
   const data = await client.fetch(articleSlugsQuery);
-  console.log("SITEMAP articleSlugsQuery data:", data);
   slugs = Array.isArray(data) ? data : [];
 } catch (err) {
   console.error("Error obteniendo slugs del sitemap:", err);
@@ -44,16 +43,7 @@ try {
     changeFrequency: "weekly",
     priority: 0.7,
   }));
+  
 
-  const testRoute = [
-  {
-    url: `${siteUrl}/articulo/test-seo-manual`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  },
-];
-
-
-  return [...staticRoutes, ...articleRoutes, ...testRoute];
+  return [...staticRoutes, ...articleRoutes];
 }
