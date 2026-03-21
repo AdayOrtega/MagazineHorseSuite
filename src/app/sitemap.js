@@ -45,5 +45,15 @@ try {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...articleRoutes];
+  const testRoute = [
+  {
+    url: `${siteUrl}/articulo/test-seo-manual`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  },
+];
+
+
+  return [...staticRoutes, ...articleRoutes, ...testRoute];
 }
