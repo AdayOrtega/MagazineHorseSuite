@@ -10,9 +10,9 @@ export const metadata = {
   description:
     "Revista digital sobre el mundo del caballo: doma clásica, salto, doma vaquera, salud, entrenamiento, yeguadas y cultura ecuestre.",
   icons: {
-    icon: "/icon.jpg",
-    shortcut: "/icon.jpg",
-    apple: "/icon.jpg",
+    icon: "/favicon.ico?v=2",
+    shortcut: "/favicon.ico?v=2",
+    apple: "/favicon.ico?v=2",
   },
 };
 
