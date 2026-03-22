@@ -51,14 +51,13 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://magazine.horsesuite.app").replace(
-    /\/$/,
-    ""
-  );
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://magazine.horsesuite.app"
+  ).replace(/\/$/, "");
 
   const canonical = `${siteUrl}/articulo/${slug}`;
 
-  const ogSource = article.ogImage ?? article.coverImage ?? article.coverImage;
+  const ogSource = article.ogImage ?? article.coverImage ?? null;
   const ogImage = ogSource
     ? urlFor(ogSource).width(1200).height(630).fit("crop").auto("format").url()
     : undefined;
@@ -94,21 +93,24 @@ export default async function ArticlePage({ params }) {
   const article = await client.fetch(articleBySlugQuery, { slug });
   if (!article) return notFound();
 
-  // Compat: section (nuevo) o category (viejo)
-  const section = article.section || article.section || null;
-
-  // Compat: coverImage (nuevo) o mainImage (viejo)
-  const heroSource = article.coverImage ?? article.coverImage ?? null;
+  const section = article.section || article.category || null;
+  const heroSource = article.coverImage ?? article.mainImage ?? null;
 
   const heroUrl = heroSource
-    ? urlFor(heroSource).width(1600).height(900).fit("crop").auto("format").url()
-    : null;;
+    ? urlFor(heroSource)
+        .width(1600)
+        .height(900)
+        .fit("crop")
+        .auto("format")
+        .url()
+    : null;
 
-  const blocks = (article.content && article.content.length)
-    ? article.content
-    : ((article.bodyLayout && article.bodyLayout.length)
-      ? article.bodyLayout
-      : (article.body || []));
+  const blocks =
+    article.content && article.content.length
+      ? article.content
+      : article.bodyLayout && article.bodyLayout.length
+        ? article.bodyLayout
+        : article.body || [];
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -126,7 +128,9 @@ export default async function ArticlePage({ params }) {
           </h1>
 
           {article.excerpt ? (
-            <p className="text-lg text-muted-foreground font-body mt-4">{article.excerpt}</p>
+            <p className="text-lg text-muted-foreground font-body mt-4">
+              {article.excerpt}
+            </p>
           ) : null}
 
           <div className="flex flex-wrap items-center gap-2 mt-4 text-xs text-muted-foreground font-body">
@@ -152,7 +156,8 @@ export default async function ArticlePage({ params }) {
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 900px"
-              priority />
+              priority
+            />
           </div>
         ) : null}
 
@@ -160,7 +165,10 @@ export default async function ArticlePage({ params }) {
           <PortableTextRenderer value={blocks} />
         </article>
 
-        <ShareButtons title={article.title} />
+        <ShareButtons
+          title={article.title}
+          canonicalUrl={`https://magazine.horsesuite.app/articulo/${slug}`}
+        />
 
         <div className="mt-12">
           <Link href="/articulos" className="text-primary font-body underline">

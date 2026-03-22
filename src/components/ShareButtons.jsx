@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 
 function Pill({ as = "a", href, onClick, children }) {
   const base =
@@ -31,25 +32,51 @@ function Icon({ children }) {
   );
 }
 
-export default function ShareButtons({ title = "", canonicalUrl }) {
+export default function ShareButtons({ title = "", canonicalUrl = "" }) {
   const [copied, setCopied] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    "https://magazine.horsesuite.app";
 
   const url = useMemo(() => {
-    if (canonicalUrl) return canonicalUrl;
-    if (typeof window !== "undefined") return window.location.href;
-    return "";
-  }, [canonicalUrl]);
+    if (canonicalUrl?.trim()) return canonicalUrl.trim();
+
+    const path = pathname || "";
+    const queryString = searchParams?.toString();
+    const query = queryString ? `?${queryString}` : "";
+
+    return `${siteUrl}${path}${query}`;
+  }, [canonicalUrl, pathname, searchParams, siteUrl]);
 
   const encodedUrl = useMemo(() => encodeURIComponent(url), [url]);
   const encodedTitle = useMemo(() => encodeURIComponent(title || ""), [title]);
 
-  const shareFacebook = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
-  const shareX = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
-  const shareLinkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
-  const shareWhatsApp = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
-  const shareTelegram = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
+  const shareFacebook = url
+    ? `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`
+    : "#";
+
+  const shareX = url
+    ? `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`
+    : "#";
+
+  const shareLinkedIn = url
+    ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
+    : "#";
+
+  const shareWhatsApp = url
+    ? `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`.trim())}`
+    : "#";
+
+  const shareTelegram = url
+    ? `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`
+    : "#";
 
   const copyToClipboard = async () => {
+    if (!url) return;
+
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
