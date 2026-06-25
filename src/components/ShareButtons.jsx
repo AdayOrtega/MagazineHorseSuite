@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 function Pill({ as = "a", href, onClick, children }) {
@@ -32,7 +32,7 @@ function Icon({ children }) {
   );
 }
 
-export default function ShareButtons({ title = "", canonicalUrl = "" }) {
+function ShareButtonsInner({ title = "", canonicalUrl = "" }) {
   const [copied, setCopied] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -119,5 +119,16 @@ export default function ShareButtons({ title = "", canonicalUrl = "" }) {
         <Icon>⧉</Icon> {copied ? "¡Copiado!" : "Copiar enlace"}
       </Pill>
     </div>
+  );
+}
+
+// Envuelve el componente en Suspense porque usa useSearchParams(): así Next
+// puede prerenderizar la página estáticamente (bueno para SEO/GEO) en vez de
+// fallar el build o caer a render solo-cliente.
+export default function ShareButtons(props) {
+  return (
+    <Suspense fallback={null}>
+      <ShareButtonsInner {...props} />
+    </Suspense>
   );
 }

@@ -21,6 +21,61 @@ function isValidSlug(slug) {
   return typeof slug === "string" && slug.trim().length > 0;
 }
 
+// ── FAQ schema (GEO/SEO) ───────────────────────────────────────────────────
+// Aplana los bloques del page builder (richText, mediaText, callout…) para
+// quedarnos solo con los bloques de Portable Text de texto, en orden.
+function aplanarBloquesTexto(items) {
+  const out = [];
+  if (!Array.isArray(items)) return out;
+  for (const it of items) {
+    if (!it || typeof it !== "object") continue;
+    if (it._type === "block" && Array.isArray(it.children)) {
+      out.push(it);
+    } else if (Array.isArray(it.content)) {
+      out.push(...aplanarBloquesTexto(it.content));
+    }
+  }
+  return out;
+}
+
+// Extrae pares pregunta→respuesta: encabezados (h1-h4) que terminan en "?" y
+// el texto que les sigue hasta el próximo encabezado. Devuelve [] si no hay.
+function extraerFAQ(blocks) {
+  const flat = aplanarBloquesTexto(blocks);
+  const textoDe = (b) =>
+    (b?.children || [])
+      .map((c) => c?.text || "")
+      .join("")
+      .replace(/\s+/g, " ")
+      .trim();
+  const esEncabezado = (b) =>
+    b?._type === "block" && /^h[1-4]$/.test(b.style || "");
+
+  const faqs = [];
+  let i = 0;
+  while (i < flat.length) {
+    const b = flat[i];
+    if (esEncabezado(b)) {
+      const pregunta = textoDe(b);
+      if (pregunta.endsWith("?")) {
+        const partes = [];
+        let j = i + 1;
+        while (j < flat.length && !esEncabezado(flat[j])) {
+          const t = textoDe(flat[j]);
+          if (t) partes.push(t);
+          j++;
+        }
+        const respuesta = partes.join(" ").trim();
+        if (respuesta.length > 40) faqs.push({ q: pregunta, a: respuesta });
+        i = j;
+        continue;
+      }
+    }
+    i++;
+  }
+  return faqs;
+}
+
 export async function generateStaticParams() {
   const slugs = await client.fetch(articleSlugsQuery);
   const list = Array.isArray(slugs) ? slugs : [];
@@ -112,8 +167,29 @@ export default async function ArticlePage({ params }) {
         ? article.bodyLayout
         : article.body || [];
 
+  // FAQ schema: solo si el artículo tiene 2+ preguntas en sus encabezados.
+  const faqs = extraerFAQ(blocks);
+  const faqJsonLd =
+    faqs.length >= 2
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }
+      : null;
+
   return (
     <div className="container mx-auto px-4 py-12">
+      {faqJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      ) : null}
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <Link
