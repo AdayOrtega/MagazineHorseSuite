@@ -14,7 +14,7 @@ export default function PREPage() {
       {/* HERO PREMIUM */}
       <section className="relative w-full h-[70vh] flex items-center justify-center pt-40">
         <Image
-          src="/pre/reunion.jpg"
+          src="/magazine/pre/reunion.jpg"
           alt="Caballo Pura Raza Española posado"
           fill
           className="object-cover brightness-[0.40]"
@@ -53,7 +53,7 @@ export default function PREPage() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative h-[420px] rounded-2xl overflow-hidden shadow-lg">
             <Image
-              src="/pre/FelipeII.jpg"
+              src="/magazine/pre/FelipeII.jpg"
               alt="Felipe II y origen del caballo español"
               fill
             className="object-contain"
@@ -103,7 +103,7 @@ export default function PREPage() {
         <div className="grid lg:grid-cols-2 gap-12 items-center flex-row-reverse">
           <div className="relative h-[420px] rounded-2xl overflow-hidden shadow-lg">
             <Image
-              src="/pre/cartujanos.jpg"
+              src="/magazine/pre/cartujanos.jpg"
               alt="Caballos cartujanos Hierro del Bocado"
               fill
             className="object-contain"
@@ -133,7 +133,7 @@ export default function PREPage() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative h-[420px] rounded-2xl overflow-hidden shadow-lg">
             <Image
-              src="/pre/yeguadaMilitar.jpg"
+              src="/magazine/pre/yeguadaMilitar.jpg"
               alt="Yeguada Militar PRE"
               fill
             className="object-contain"
@@ -170,7 +170,7 @@ export default function PREPage() {
 
         <div className="relative h-[420px] mt-12 rounded-2xl overflow-hidden shadow-lg">
           <Image
-            src="/pre/morfologia1.jpg"
+            src="/magazine/pre/morfologia1.jpg"
             alt="Morfología del caballo PRE"
             fill
             className="object-contain"
@@ -193,7 +193,7 @@ export default function PREPage() {
 
         <div className="relative h-[420px] mt-12 rounded-2xl overflow-hidden shadow-lg">
           <Image
-            src="/pre/caballerizasReales.jpg"
+            src="/magazine/pre/caballerizasReales.jpg"
             alt="Líneas de sangre PRE"
             fill
             className="object-cover"
@@ -255,7 +255,7 @@ export default function PREPage() {
         <div className="grid lg:grid-cols-2 gap-12 mt-16 items-center">
           <div className="relative h-[420px] rounded-2xl overflow-hidden shadow-lg">
             <Image
-              src="/pre/aplomos.jpg"
+              src="/magazine/pre/aplomos.jpg"
               alt="Aplomos y morfología PRE"
               fill
               className="object-cover"
