@@ -39,7 +39,7 @@ function ShareButtonsInner({ title = "", canonicalUrl = "" }) {
 
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    "https://magazine.horsesuite.app";
+    "https://horsesuite.app/magazine";
 
   const url = useMemo(() => {
     if (canonicalUrl?.trim()) return canonicalUrl.trim();

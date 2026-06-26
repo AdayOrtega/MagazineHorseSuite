@@ -4,7 +4,7 @@ import { articleSlugsQuery } from "@/lib/sanity/queries";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://magazine.horsesuite.app";
+  "https://horsesuite.app/magazine";
 
 function normalizeSlug(item) {
   if (!item) return null;

@@ -107,7 +107,7 @@ export async function generateMetadata({ params }) {
   }
 
   const siteUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL || "https://magazine.horsesuite.app"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://horsesuite.app/magazine"
   ).replace(/\/$/, "");
 
   const canonical = `${siteUrl}/articulo/${slug}`;
@@ -243,7 +243,7 @@ export default async function ArticlePage({ params }) {
 
         <ShareButtons
           title={article.title}
-          canonicalUrl={`https://magazine.horsesuite.app/articulo/${slug}`}
+          canonicalUrl={`https://horsesuite.app/magazine/articulo/${slug}`}
         />
 
         <div className="mt-12">

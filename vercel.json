@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "magazine.horsesuite.app" }],
+      "destination": "https://horsesuite.app/magazine/:path*",
+      "permanent": true
+    }
+  ]
+}

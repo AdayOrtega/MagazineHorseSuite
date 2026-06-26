@@ -1,7 +1,7 @@
 // src/app/robots.js
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://magazine.horsesuite.app";
+  "https://horsesuite.app/magazine";
 
 export default function robots() {
   return {
